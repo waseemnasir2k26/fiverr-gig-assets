@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiverr Gig Image Generator - SkynetJoe</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #050507;
+    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  .page-header {
+    text-align: center;
+    padding: 40px 0 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 40px;
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1DBF73, #7c6aff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    color: #888;
+    font-size: 14px;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #1DBF73, #17a863);
+    color: #fff;
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(29,191,115,0.3); }
+
+  .btn-secondary {
+    background: rgba(255,255,255,0.06);
+    color: #ccc;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+  .progress-bar {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    display: none;
+  }
+
+  .progress-bar .track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar .fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #1DBF73, #7c6aff);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .progress-bar .label {
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  .gig-section {
+    margin-bottom: 56px;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 28px;
+    background: rgba(255,255,255,0.01);
+  }
+
+  .gig-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .gig-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .gig-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .gig-subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .gig-download-all {
+    margin-left: auto;
+  }
+
+  .images-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 1200px) {
+    .images-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 800px) {
+    .images-grid { grid-template-columns: 1fr; }
+  }
+
+  .image-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    margin-bottom: 12px;
+    align-self: flex-start;
+  }
+
+  .image-card canvas {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .image-card .btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Fiverr Gig Image Generator</h1>
+  <p>10 Gigs &times; 3 Images = 30 Professional PNGs at 1280&times;769 @2x</p>
+</div>
+
+<div class="controls">
+  <button class="btn btn-primary" onclick="downloadAll()">Download All 30 Images</button>
+  <button class="btn btn-secondary" onclick="regenerateAll()">Regenerate All</button>
+</div>
+
+<div class="progress-bar" id="progressBar">
+  <div class="track"><div class="fill" id="progressFill"></div></div>
+  <div class="label" id="progressLabel">Downloading...</div>
+</div>
+
+<div id="gigsContainer"></div>
+
+<script>
+// =========================================================================
+// DATA
+// =========================================================================
+const GIGS = [
+  {
+    id: 1,
+    name: "N8N Automation",
+    headline: "N8N AUTOMATION",
+    subtitle: "Free Up 40+ Hours/Week on Autopilot",
+    badge: "ZERO COMPETITION",
+    accent: "#1DBF73",
+    bgFrom: "#041208", bgTo: "#0a2818",
+    tools: ["n8n", "OpenAI", "Claude", "Slack", "Gmail", "HubSpot"],
+    pricing: { basic: { price: "$97", items: ["1 Workflow", "5 Nodes Max", "Documentation", "1 Revision"] }, standard: { price: "$247", items: ["1 Workflow", "15 Nodes + AI", "API Integration", "3 Revisions"] }, premium: { price: "$497", items: ["3 Workflows", "Unlimited Nodes", "Full AI Stack", "30-Day Support"] } },
+    steps: ["Discovery", "Workflow Map", "Build & Test", "Deploy", "Support"]
+  },
+  {
+    id: 2,
+    name: "AI Voice + Chatbot",
+    headline: "AI VOICE + CHATBOT",
+    subtitle: "Never Miss a 3AM Lead Again",
+    badge: "BLUE OCEAN",
+    accent: "#06b6d4",
+    bgFrom: "#041218", bgTo: "#0a1828",
+    tools: ["Vapi", "n8n", "Twilio", "GPT-4", "HubSpot"],
+    pricing: { basic: { price: "$147", items: ["Chatbot Only", "1 Channel", "Basic AI", "Setup Guide"] }, standard: { price: "$397", items: ["Voice + Chat", "Multi-Channel", "GPT-4 AI", "CRM Sync"] }, premium: { price: "$797", items: ["Full System", "All Channels", "Custom Voice", "60-Day Support"] } },
+    steps: ["Discovery", "AI Training", "Build & Test", "Integration", "Support"]
+  },
+  {
+    id: 3,
+    name: "WordPress + AI",
+    headline: "WORDPRESS + AI",
+    subtitle: "Ship in Days What Agencies Take Months",
+    badge: "FIRST MOVER",
+    accent: "#4f8eff",
+    bgFrom: "#040a18", bgTo: "#0e1a38",
+    tools: ["WordPress", "Claude", "Elementor", "ChatGPT", "SEO", "n8n"],
+    pricing: { basic: { price: "$147", items: ["1-Page Landing", "Mobile Ready", "Basic SEO", "1 Revision"] }, standard: { price: "$497", items: ["5-Page Business", "AI Chatbot", "Full SEO", "Content"] }, premium: { price: "$997", items: ["12-Page Premium", "AI Tools Suite", "Speed Optimized", "30-Day Support"] } },
+    steps: ["Discovery", "Design", "Build & AI", "Speed & SEO", "Deploy"]
+  },
+  {
+    id: 4,
+    name: "GHL + AI",
+    headline: "GHL + AI",
+    subtitle: "Your CRM Is Leaving Money on the Table",
+    badge: "ZERO COMPETITION",
+    accent: "#ff4d4d",
+    bgFrom: "#120408", bgTo: "#2a0c14",
+    tools: ["GHL", "Vapi", "n8n", "Twilio", "GPT-4"],
+    pricing: { basic: { price: "$147", items: ["CRM Setup", "Pipeline Build", "Basic Automations", "Documentation"] }, standard: { price: "$397", items: ["GHL + AI Bot", "Voice Agent", "Lead Scoring", "Training Call"] }, premium: { price: "$797", items: ["Agency AI Stack", "Multi-Pipeline", "Full Automation", "60-Day Support"] } },
+    steps: ["Discovery", "CRM Setup", "AI Integration", "Automation", "Training"]
+  },
+  {
+    id: 5,
+    name: "Custom AI Agent",
+    headline: "CUSTOM AI AGENT",
+    subtitle: "Replace 3 Employees with One AI Agent",
+    badge: "PREMIUM SERVICE",
+    accent: "#7c6aff",
+    bgFrom: "#08061a", bgTo: "#161238",
+    tools: ["n8n", "GPT-4", "Claude", "RAG", "Slack", "CRM"],
+    pricing: { basic: { price: "$297", items: ["1 Agent", "1 Tool", "Basic Memory", "Documentation"] }, standard: { price: "$597", items: ["Multi-Tool Agent", "RAG Knowledge", "API Access", "Training"] }, premium: { price: "$995", items: ["Multi-Agent System", "Full RAG Stack", "Custom Tools", "90-Day Support"] } },
+    steps: ["Discovery", "Architecture", "Agent Build", "Testing", "Deploy"]
+  },
+  {
+    id: 6,
+    name: "AI Bundle (7-in-1)",
+    headline: "7-IN-1 AI BUNDLE",
+    subtitle: "7 AI Systems. One Price. Zero Headaches.",
+    badge: "SAVE 60%",
+    accent: "#FFD700",
+    bgFrom: "#0c0a02", bgTo: "#221c06",
+    tools: ["AI", "CRM", "Chatbot", "Voice", "n8n", "Lead Gen", "Analytics"],
+    pricing: { basic: { price: "$497", items: ["3 AI Systems", "Basic Setup", "Documentation", "14-Day Support"] }, standard: { price: "$795", items: ["5 AI Systems", "Full Integration", "Training Call", "30-Day Support"] }, premium: { price: "$995", items: ["All 7 Systems", "Custom Build", "Team Training", "90-Day Support"] } },
+    steps: ["Discovery", "Strategy", "Build Phase 1", "Build Phase 2", "Full Deploy"]
+  },
+  {
+    id: 7,
+    name: "Zapier to n8n Migration",
+    headline: "SAVE 90%",
+    subtitle: "Stop Burning $800/mo on Zapier",
+    badge: "SAVE $800/MONTH",
+    accent: "#f59e0b",
+    bgFrom: "#0c0804", bgTo: "#221a0a",
+    tools: ["Zapier", "Make", "n8n", "OpenAI", "Self-Host"],
+    pricing: { basic: { price: "$147", items: ["5 Workflows", "Direct Migration", "Documentation", "7-Day Support"] }, standard: { price: "$397", items: ["15 Workflows + AI", "Optimization", "Self-Host Setup", "14-Day Support"] }, premium: { price: "$795", items: ["Unlimited Workflows", "Full AI Upgrade", "VPS Hosting", "60-Day Support"] } },
+    steps: ["Audit", "Map", "Migrate", "AI Upgrade", "Go Live"]
+  },
+  {
+    id: 8,
+    name: "AI SDR Agent",
+    headline: "AI SDR AGENT",
+    subtitle: "AI Sales Rep That Never Sleeps",
+    badge: "47 MEETINGS IN 30 DAYS",
+    accent: "#f43f5e",
+    bgFrom: "#12040a", bgTo: "#2a0c18",
+    tools: ["n8n", "LinkedIn", "Email", "HubSpot", "GPT-4"],
+    pricing: { basic: { price: "$297", items: ["Email SDR Only", "1 Campaign", "Basic Sequences", "Documentation"] }, standard: { price: "$597", items: ["Email + LinkedIn", "Multi-Campaign", "AI Personalization", "Reporting"] }, premium: { price: "$995", items: ["Full SDR System", "Unlimited Outreach", "A/B Testing", "90-Day Support"] } },
+    steps: ["Discovery", "ICP Research", "Agent Build", "Outreach Launch", "Optimize"]
+  },
+  {
+    id: 9,
+    name: "GEO / AEO",
+    headline: "GEO / AEO",
+    subtitle: "89% of B2B Buyers Search AI First",
+    badge: "NEW CATEGORY",
+    accent: "#ff6d00",
+    bgFrom: "#120a04", bgTo: "#281a0a",
+    tools: ["ChatGPT", "Gemini", "Perplexity", "Schema", "SEO"],
+    pricing: { basic: { price: "$147", items: ["AI Visibility Audit", "5-Page Analysis", "Recommendations", "Report"] }, standard: { price: "$397", items: ["Optimize 20 Pages", "Schema Markup", "Content Rewrite", "Tracking Setup"] }, premium: { price: "$795", items: ["Dominate 50 Pages", "Full AEO Stack", "Monthly Reports", "90-Day Support"] } },
+    steps: ["AI Audit", "Content Restructure", "Schema Markup", "Citation Tracking", "Report"]
+  },
+  {
+    id: 10,
+    name: "Vibe Code MVP",
+    headline: "VIBE CODE MVP",
+    subtitle: "Ship in Days What Agencies Quote Months For",
+    badge: "FIVERR OFFICIAL CATEGORY",
+    accent: "#00e676",
+    bgFrom: "#04120a", bgTo: "#0a2818",
+    tools: ["Lovable", "Cursor", "Claude Code", "Bolt", "v0", "Supabase"],
+    pricing: { basic: { price: "$197", items: ["Clickable Prototype", "3 Pages", "Basic Design", "1 Revision"] }, standard: { price: "$597", items: ["Launch MVP", "Full Stack", "Auth + DB", "14-Day Support"] }, premium: { price: "$1997", items: ["Production SaaS", "Scale-Ready", "CI/CD Pipeline", "60-Day Support"] } },
+    steps: ["Discovery", "Prototype", "Build & Iterate", "Security Review", "Deploy"]
+  }
+];
+
+const W = 1280;
+const H = 769;
+const DPR = 2;
+const CW = W * DPR;
+const CH = H * DPR;
+
+// =========================================================================
+// CANVAS DRAWING HELPERS
+// =========================================================================
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return { r, g, b };
+}
+
+function drawBackground(ctx, bgFrom, bgTo) {
+  const grad = ctx.createLinearGradient(0, 0, CW, CH);
+  grad.addColorStop(0, bgFrom);
+  grad.addColorStop(1, bgTo);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, CW, CH);
+}
+
+function drawDotGrid(ctx, accent, opacity) {
+  const rgb = hexToRgb(accent);
+  ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${opacity || 0.08})`;
+  const spacing = 40 * DPR;
+  const radius = 1.5 * DPR;
+  for (let x = spacing; x < CW; x += spacing) {
+    for (let y = spacing; y < CH; y += spacing) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+function drawCenterGlow(ctx, accent, intensity) {
+  const rgb = hexToRgb(accent);
+  const grad = ctx.createRadialGradient(CW/2, CH/2, 0, CW/2, CH/2, CW * 0.45);
+  grad.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b},${intensity || 0.12})`);
+  grad.addColorStop(0.5, `rgba(${rgb.r},${rgb.g},${rgb.b},${(intensity || 0.12) * 0.3})`);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, CW, CH);
+}
+
+function drawCornerAccents(ctx, accent) {
+  const len = 60 * DPR;
+  const off = 24 * DPR;
+  const lw = 2.5 * DPR;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = lw;
+  ctx.globalAlpha = 0.5;
+
+  // Top-left
+  ctx.beginPath();
+  ctx.moveTo(off, off + len); ctx.lineTo(off, off); ctx.lineTo(off + len, off);
+  ctx.stroke();
+
+  // Top-right
+  ctx.beginPath();
+  ctx.moveTo(CW - off - len, off); ctx.lineTo(CW - off, off); ctx.lineTo(CW - off, off + len);
+  ctx.stroke();
+
+  // Bottom-left
+  ctx.beginPath();
+  ctx.moveTo(off, CH - off - len); ctx.lineTo(off, CH - off); ctx.lineTo(off + len, CH - off);
+  ctx.stroke();
+
+  // Bottom-right
+  ctx.beginPath();
+  ctx.moveTo(CW - off - len, CH - off); ctx.lineTo(CW - off, CH - off); ctx.lineTo(CW - off, CH - off - len);
+  ctx.stroke();
+
+  ctx.globalAlpha = 1;
+}
+
+function drawBadge(ctx, text, accent) {
+  const padX = 18 * DPR;
+  const padY = 10 * DPR;
+  const fontSize = 13 * DPR;
+  ctx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  const tw = ctx.measureText(text).width;
+  const bw = tw + padX * 2;
+  const bh = fontSize + padY * 2;
+  const bx = CW - bw - 40 * DPR;
+  const by = 36 * DPR;
+  const radius = 8 * DPR;
+
+  // Badge background
+  const rgb = hexToRgb(accent);
+  ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.15)`;
+  roundRect(ctx, bx, by, bw, bh, radius);
+  ctx.fill();
+
+  // Badge border
+  ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.5)`;
+  ctx.lineWidth = 1.5 * DPR;
+  roundRect(ctx, bx, by, bw, bh, radius);
+  ctx.stroke();
+
+  // Badge text
+  ctx.fillStyle = accent;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, bx + bw/2, by + bh/2);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+function drawToolPills(ctx, tools, accent, y) {
+  const fontSize = 13 * DPR;
+  const padX = 14 * DPR;
+  const padY = 8 * DPR;
+  const gap = 10 * DPR;
+  const pillH = fontSize + padY * 2;
+  const radius = pillH / 2;
+
+  ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  const widths = tools.map(t => ctx.measureText(t).width + padX * 2);
+  const totalW = widths.reduce((a, b) => a + b, 0) + (tools.length - 1) * gap;
+  let x = (CW - totalW) / 2;
+
+  const rgb = hexToRgb(accent);
+
+  tools.forEach((tool, i) => {
+    const pw = widths[i];
+
+    ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.1)`;
+    roundRect(ctx, x, y, pw, pillH, radius);
+    ctx.fill();
+
+    ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`;
+    ctx.lineWidth = 1 * DPR;
+    roundRect(ctx, x, y, pw, pillH, radius);
+    ctx.stroke();
+
+    ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.9)`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tool, x + pw/2, y + pillH/2);
+
+    x += pw + gap;
+  });
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+function drawBottomBar(ctx, accent) {
+  const barH = 48 * DPR;
+  const y = CH - barH;
+
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(0, y, CW, barH);
+
+  // Top line
+  const rgb = hexToRgb(accent);
+  ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.4)`;
+  ctx.fillRect(0, y, CW, 1.5 * DPR);
+
+  // Fiverr green indicator
+  const dotR = 5 * DPR;
+  const dotX = 60 * DPR;
+  const dotY = y + barH / 2;
+  ctx.fillStyle = '#1DBF73';
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, dotR, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = `600 ${12 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  ctx.textBaseline = 'middle';
+  ctx.fillText('AVAILABLE NOW  |  SKYNETJOE.COM', dotX + dotR + 12 * DPR, dotY);
+  ctx.textBaseline = 'alphabetic';
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  let lines = [];
+  for (let i = 0; i < words.length; i++) {
+    const test = line + words[i] + ' ';
+    if (ctx.measureText(test).width > maxWidth && i > 0) {
+      lines.push(line.trim());
+      line = words[i] + ' ';
+    } else {
+      line = test;
+    }
+  }
+  lines.push(line.trim());
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], x, y + i * lineHeight);
+  }
+  return lines.length;
+}
+
+// =========================================================================
+// IMAGE 1: MAIN THUMBNAIL
+// =========================================================================
+function drawImage1(canvas, gig) {
+  const ctx = canvas.getContext('2d');
+  canvas.width = CW;
+  canvas.height = CH;
+
+  // Background
+  drawBackground(ctx, gig.bgFrom, gig.bgTo);
+  drawDotGrid(ctx, gig.accent, 0.06);
+  drawCenterGlow(ctx, gig.accent, 0.14);
+
+  // Corner accents
+  drawCornerAccents(ctx, gig.accent);
+
+  // Badge
+  drawBadge(ctx, gig.badge, gig.accent);
+
+  // Headline
+  const headlineSize = 72 * DPR;
+  ctx.font = `900 ${headlineSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Text shadow / glow
+  const rgb = hexToRgb(gig.accent);
+  ctx.shadowColor = `rgba(${rgb.r},${rgb.g},${rgb.b},0.4)`;
+  ctx.shadowBlur = 40 * DPR;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(gig.headline, CW / 2, CH * 0.36);
+  ctx.shadowBlur = 0;
+
+  // Underline accent
+  const tw = ctx.measureText(gig.headline).width;
+  const lineY = CH * 0.36 + headlineSize * 0.55;
+  ctx.fillStyle = gig.accent;
+  ctx.fillRect(CW/2 - tw*0.3, lineY, tw*0.6, 4 * DPR);
+
+  // Subtitle
+  const subSize = 26 * DPR;
+  ctx.font = `500 ${subSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.fillText(gig.subtitle, CW / 2, CH * 0.50);
+
+  // Tools
+  drawToolPills(ctx, gig.tools, gig.accent, CH * 0.62);
+
+  // Bottom bar
+  drawBottomBar(ctx, gig.accent);
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+// =========================================================================
+// IMAGE 2: WHAT YOU GET
+// =========================================================================
+function drawImage2(canvas, gig) {
+  const ctx = canvas.getContext('2d');
+  canvas.width = CW;
+  canvas.height = CH;
+
+  drawBackground(ctx, gig.bgFrom, gig.bgTo);
+  drawDotGrid(ctx, gig.accent, 0.04);
+
+  const rgb = hexToRgb(gig.accent);
+
+  // Title
+  const titleSize = 40 * DPR;
+  ctx.font = `900 ${titleSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('WHAT YOU GET', CW/2, 80 * DPR);
+
+  // Accent line under title
+  ctx.fillStyle = gig.accent;
+  ctx.fillRect(CW/2 - 60 * DPR, 95 * DPR, 120 * DPR, 3 * DPR);
+
+  // Three columns
+  const tiers = ['BASIC', 'STANDARD', 'PREMIUM'];
+  const tierData = [gig.pricing.basic, gig.pricing.standard, gig.pricing.premium];
+  const colW = 340 * DPR;
+  const colGap = 40 * DPR;
+  const totalColW = colW * 3 + colGap * 2;
+  const startX = (CW - totalColW) / 2;
+  const colTop = 130 * DPR;
+  const colH = 440 * DPR;
+
+  tiers.forEach((tier, i) => {
+    const x = startX + i * (colW + colGap);
+    const isStandard = i === 1;
+    const extraH = isStandard ? 20 * DPR : 0;
+    const y = colTop - (isStandard ? 10 * DPR : 0);
+    const h = colH + extraH;
+    const r = 16 * DPR;
+
+    // Column background
+    ctx.fillStyle = isStandard
+      ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.08)`
+      : 'rgba(255,255,255,0.03)';
+    roundRect(ctx, x, y, colW, h, r);
+    ctx.fill();
+
+    // Column border
+    ctx.strokeStyle = isStandard
+      ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.5)`
+      : 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = isStandard ? 2 * DPR : 1 * DPR;
+    roundRect(ctx, x, y, colW, h, r);
+    ctx.stroke();
+
+    // Glow for standard
+    if (isStandard) {
+      ctx.shadowColor = `rgba(${rgb.r},${rgb.g},${rgb.b},0.2)`;
+      ctx.shadowBlur = 30 * DPR;
+      roundRect(ctx, x, y, colW, h, r);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // "MOST POPULAR" badge
+      const badgeW = 160 * DPR;
+      const badgeH = 28 * DPR;
+      const badgeX = x + (colW - badgeW) / 2;
+      const badgeY = y - badgeH / 2;
+      ctx.fillStyle = gig.accent;
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, badgeH/2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.font = `800 ${11 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('MOST POPULAR', badgeX + badgeW/2, badgeY + badgeH/2);
+    }
+
+    // Tier name
+    ctx.fillStyle = isStandard ? gig.accent : 'rgba(255,255,255,0.5)';
+    ctx.font = `800 ${16 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(tier, x + colW/2, y + 30 * DPR);
+
+    // Price
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 ${42 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.fillText(tierData[i].price, x + colW/2, y + 60 * DPR);
+
+    // Divider
+    ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.2)`;
+    ctx.fillRect(x + 30 * DPR, y + 125 * DPR, colW - 60 * DPR, 1 * DPR);
+
+    // Items
+    const itemFontSize = 15 * DPR;
+    ctx.font = `500 ${itemFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+
+    tierData[i].items.forEach((item, j) => {
+      const iy = y + 150 * DPR + j * (55 * DPR);
+      const ix = x + 40 * DPR;
+
+      // Checkmark
+      ctx.fillStyle = gig.accent;
+      ctx.font = `700 ${18 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      ctx.fillText('\u2713', ix, iy);
+
+      // Item text
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.font = `500 ${itemFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      ctx.fillText(item, ix + 28 * DPR, iy + 2 * DPR);
+    });
+  });
+
+  // Bottom CTA
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = `600 ${16 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  ctx.fillText('Message me for a custom quote  \u2192', CW/2, CH - 65 * DPR);
+
+  // Corner accents
+  drawCornerAccents(ctx, gig.accent);
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+// =========================================================================
+// IMAGE 3: HOW IT WORKS
+// =========================================================================
+function drawImage3(canvas, gig) {
+  const ctx = canvas.getContext('2d');
+  canvas.width = CW;
+  canvas.height = CH;
+
+  drawBackground(ctx, gig.bgFrom, gig.bgTo);
+  drawDotGrid(ctx, gig.accent, 0.04);
+
+  const rgb = hexToRgb(gig.accent);
+
+  // Title
+  const titleSize = 40 * DPR;
+  ctx.font = `900 ${titleSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('HOW IT WORKS', CW/2, 80 * DPR);
+
+  ctx.fillStyle = gig.accent;
+  ctx.fillRect(CW/2 - 60 * DPR, 95 * DPR, 120 * DPR, 3 * DPR);
+
+  // 5 steps in horizontal flow
+  const steps = gig.steps;
+  const stepCount = steps.length;
+  const circleR = 36 * DPR;
+  const stepW = 200 * DPR;
+  const totalStepW = stepCount * stepW;
+  const sStartX = (CW - totalStepW) / 2 + stepW / 2;
+  const stepY = 220 * DPR;
+
+  // Connecting line
+  const lineStartX = sStartX;
+  const lineEndX = sStartX + (stepCount - 1) * stepW;
+  ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.25)`;
+  ctx.lineWidth = 2.5 * DPR;
+  ctx.setLineDash([8 * DPR, 6 * DPR]);
+  ctx.beginPath();
+  ctx.moveTo(lineStartX, stepY);
+  ctx.lineTo(lineEndX, stepY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  steps.forEach((step, i) => {
+    const cx = sStartX + i * stepW;
+
+    // Circle background
+    ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.1)`;
+    ctx.beginPath();
+    ctx.arc(cx, stepY, circleR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Circle border
+    ctx.strokeStyle = gig.accent;
+    ctx.lineWidth = 2.5 * DPR;
+    ctx.beginPath();
+    ctx.arc(cx, stepY, circleR, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Number
+    ctx.fillStyle = gig.accent;
+    ctx.font = `900 ${22 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(i + 1), cx, stepY);
+
+    // Step label
+    ctx.fillStyle = '#fff';
+    ctx.font = `700 ${14 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(step, cx, stepY + circleR + 16 * DPR);
+
+    // Arrow between steps
+    if (i < stepCount - 1) {
+      const arrowX = cx + stepW / 2;
+      ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.5)`;
+      ctx.beginPath();
+      ctx.moveTo(arrowX - 8 * DPR, stepY - 5 * DPR);
+      ctx.lineTo(arrowX + 8 * DPR, stepY);
+      ctx.lineTo(arrowX - 8 * DPR, stepY + 5 * DPR);
+      ctx.closePath();
+      ctx.fill();
+    }
+  });
+
+  // "TOOLS I USE" section
+  const toolsY = 380 * DPR;
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = `800 ${14 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText('TOOLS I USE', CW/2, toolsY);
+
+  // Divider line
+  ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.15)`;
+  ctx.fillRect(CW * 0.2, toolsY - 14 * DPR, CW * 0.6, 1 * DPR);
+
+  drawToolPills(ctx, gig.tools, gig.accent, toolsY + 30 * DPR);
+
+  // Stats bar
+  const statsY = 510 * DPR;
+  const stats = ['50+ Projects', '5-Star Rating', '24hr Response'];
+  const statsBarW = 700 * DPR;
+  const statsBarH = 56 * DPR;
+  const statsBarX = (CW - statsBarW) / 2;
+
+  ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.06)`;
+  roundRect(ctx, statsBarX, statsY, statsBarW, statsBarH, 12 * DPR);
+  ctx.fill();
+
+  ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.15)`;
+  ctx.lineWidth = 1 * DPR;
+  roundRect(ctx, statsBarX, statsY, statsBarW, statsBarH, 12 * DPR);
+  ctx.stroke();
+
+  const statW = statsBarW / stats.length;
+  stats.forEach((stat, i) => {
+    const sx = statsBarX + i * statW + statW / 2;
+    ctx.fillStyle = '#fff';
+    ctx.font = `700 ${16 * DPR}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(stat, sx, statsY + statsBarH / 2);
+
+    // Divider
+    if (i < stats.length - 1) {
+      ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.2)`;
+      ctx.fillRect(statsBarX + (i + 1) * statW, statsY + 12 * DPR, 1 * DPR, statsBarH - 24 * DPR);
+    }
+  });
+
+  // Corner accents
+  drawCornerAccents(ctx, gig.accent);
+
+  // Bottom bar
+  drawBottomBar(ctx, gig.accent);
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+// =========================================================================
+// DOWNLOAD HELPERS
+// =========================================================================
+function downloadCanvas(canvas, filename) {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+async function downloadAll() {
+  const bar = document.getElementById('progressBar');
+  const fill = document.getElementById('progressFill');
+  const label = document.getElementById('progressLabel');
+  bar.style.display = 'block';
+
+  const canvases = document.querySelectorAll('canvas[data-filename]');
+  const total = canvases.length;
+
+  for (let i = 0; i < total; i++) {
+    const c = canvases[i];
+    downloadCanvas(c, c.dataset.filename);
+    fill.style.width = `${((i + 1) / total) * 100}%`;
+    label.textContent = `Downloading ${i + 1} of ${total}...`;
+    await new Promise(r => setTimeout(r, 350));
+  }
+
+  label.textContent = `Done! ${total} images downloaded.`;
+  setTimeout(() => { bar.style.display = 'none'; }, 3000);
+}
+
+function downloadGigImages(gigId) {
+  const canvases = document.querySelectorAll(`canvas[data-gig="${gigId}"]`);
+  canvases.forEach((c, i) => {
+    setTimeout(() => downloadCanvas(c, c.dataset.filename), i * 350);
+  });
+}
+
+// =========================================================================
+// BUILD UI
+// =========================================================================
+function buildUI() {
+  const container = document.getElementById('gigsContainer');
+
+  GIGS.forEach(gig => {
+    const section = document.createElement('div');
+    section.className = 'gig-section';
+
+    const header = document.createElement('div');
+    header.className = 'gig-header';
+
+    const num = document.createElement('div');
+    num.className = 'gig-number';
+    num.style.background = gig.accent;
+    num.textContent = gig.id;
+
+    const titleBlock = document.createElement('div');
+    const title = document.createElement('div');
+    title.className = 'gig-title';
+    title.textContent = gig.name;
+    const sub = document.createElement('div');
+    sub.className = 'gig-subtitle';
+    sub.textContent = gig.subtitle;
+    titleBlock.appendChild(title);
+    titleBlock.appendChild(sub);
+
+    const dlBtn = document.createElement('button');
+    dlBtn.className = 'btn btn-secondary gig-download-all';
+    dlBtn.textContent = 'Download 3';
+    dlBtn.onclick = () => downloadGigImages(gig.id);
+
+    header.appendChild(num);
+    header.appendChild(titleBlock);
+    header.appendChild(dlBtn);
+    section.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'images-grid';
+
+    const labels = ['Main Thumbnail', 'What You Get', 'My Process'];
+    const drawFns = [drawImage1, drawImage2, drawImage3];
+    const suffixes = ['main', 'packages', 'process'];
+
+    for (let i = 0; i < 3; i++) {
+      const card = document.createElement('div');
+      card.className = 'image-card';
+
+      const lbl = document.createElement('div');
+      lbl.className = 'image-label';
+      lbl.textContent = labels[i];
+      card.appendChild(lbl);
+
+      const canvas = document.createElement('canvas');
+      canvas.style.width = '100%';
+      canvas.style.height = 'auto';
+      const fname = `gig${gig.id}-${suffixes[i]}-${gig.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
+      canvas.dataset.filename = fname;
+      canvas.dataset.gig = gig.id;
+      canvas.dataset.drawIdx = i;
+      canvas.dataset.gigIdx = GIGS.indexOf(gig);
+      card.appendChild(canvas);
+
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-secondary';
+      btn.textContent = 'Download PNG';
+      btn.onclick = () => downloadCanvas(canvas, fname);
+      card.appendChild(btn);
+
+      grid.appendChild(card);
+    }
+
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
+
+function renderAll() {
+  const canvases = document.querySelectorAll('canvas[data-draw-idx]');
+  const drawFns = [drawImage1, drawImage2, drawImage3];
+
+  canvases.forEach(c => {
+    const drawIdx = parseInt(c.dataset.drawIdx);
+    const gigIdx = parseInt(c.dataset.gigIdx);
+    drawFns[drawIdx](c, GIGS[gigIdx]);
+  });
+}
+
+function regenerateAll() {
+  renderAll();
+}
+
+// =========================================================================
+// INIT
+// =========================================================================
+buildUI();
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    renderAll();
+  });
+});
+</script>
+</body>
+</html>

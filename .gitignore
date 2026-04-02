@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Remotion cache
+.remotion/
+
+# Large generated files (render locally)
+n8n-video/out/*.mp4
+n8n-video/public/bgm.wav
