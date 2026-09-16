@@ -2,6 +2,10 @@
 
 Complete toolkit for generating professional Fiverr gig images, explainer videos, and PDF sheets — all from a single data source.
 
+## Status
+
+Last reviewed: September 2026 · release v2026.09
+
 **Live Profile:** [fiverr.com/agencies/skynetjoellc](https://www.fiverr.com/agencies/skynetjoellc)
 
 ---
